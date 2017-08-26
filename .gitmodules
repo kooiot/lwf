@@ -1,0 +1,18 @@
+[submodule "3rd/lua-resty-random"]
+	path = 3rd/lua-resty-random
+	url = https://github.com/bungle/lua-resty-random.git
+[submodule "3rd/lua-resty-reqargs"]
+	path = 3rd/lua-resty-reqargs
+	url = https://github.com/bungle/lua-resty-reqargs.git
+[submodule "3rd/lua-resty-route"]
+	path = 3rd/lua-resty-route
+	url = https://github.com/bungle/lua-resty-route.git
+[submodule "3rd/lua-resty-session"]
+	path = 3rd/lua-resty-session
+	url = https://github.com/bungle/lua-resty-session.git
+[submodule "3rd/lua-resty-template"]
+	path = 3rd/lua-resty-template
+	url = https://github.com/bungle/lua-resty-template.git
+[submodule "3rd/lua-resty-validation"]
+	path = 3rd/lua-resty-validation
+	url = https://github.com/bungle/lua-resty-validation.git
