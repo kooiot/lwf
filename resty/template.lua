@@ -1,0 +1,1 @@
+../3rd/lua-resty-template/lib/resty/template.lua
