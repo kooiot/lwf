@@ -95,8 +95,8 @@ local function shared_index = function(tab, key)
 end
 
 local function to_ngx(method, uri, header, body, httpver, sock)
-	local to_ngx_req = require 'lwf.skynet.to_ngx_req'
-	local to_ngx_resp = require 'lwf.skynet.to_ngx_resp'
+	local to_ngx_req = require 'lwf.skynet.req'
+	local to_ngx_resp = require 'lwf.skynet.resp'
 	local path, query = urllib.parse(uri)
 	assert(header)
 	local ngx = {
