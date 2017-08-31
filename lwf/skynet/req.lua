@@ -1,3 +1,4 @@
+local skynet = require 'skynet'
 local util = require "lwf.util"
 local urllib = require 'http.url'
 
@@ -128,14 +129,14 @@ local function parse_post_data(header, body, tab, overwrite)
     end
   else
     local length = tonumber(header["content-length"]) or 0
-    tab.post_data body:sub(1, length) or ""
+    tab.post_data = body:sub(1, length) or ""
   end
   return tab
 end
 
 
 local function to_ngx_req(ngx, body, httpver, sockethelper)
-	assert(var)
+	assert(ngx)
 	local var = ngx.var
 	local start_time = skynet.now()
 	local post_args = {}

@@ -5,6 +5,7 @@ local urllib = require 'http.url'
 local crypt = require 'skynet.crypt'
 local sockethelper = require "http.sockethelper"
 local shared = require 'lwf.skynet.shared'
+local util = require 'lwf.util'
 
 local ngx_base = {
 	OK = 0,
@@ -62,12 +63,12 @@ local ngx_base = {
 	STDERR = 'stderr',
 	EMERG = 'emerg',
 	ALERT = 'alert',
-	CRIT = 'crit'
+	CRIT = 'crit',
 	ERR = 'err',
 	WARN = 'warn',
 	NOTICE = 'notice',
 	INFO = 'info',
-	DEBUG = 'debug'
+	DEBUG = 'debug',
 }
 
 local ngx_log = function(level, ...)
@@ -85,7 +86,7 @@ local function response(sock, ...)
 	end
 end
 
-local function shared_index = function(tab, key)
+local function shared_index(tab, key)
 	local s = rawget(tab, key)
 	if not s then
 		s = shared.new(key)
@@ -94,7 +95,7 @@ local function shared_index = function(tab, key)
 	return s
 end
 
-local function to_ngx(method, uri, header, body, httpver, sock)
+local function create_wrapper(method, uri, header, body, httpver, sock)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
 	local path, query = urllib.parse(uri)
@@ -104,11 +105,11 @@ local function to_ngx(method, uri, header, body, httpver, sock)
 			method = method,
 			header = header,
 			uri = uri,
-			path = path
+			path = path,
 			args = query,
 		},
 		arg = {},
-		ctx = {}
+		ctx = {},
 		location = {
 			capture = null_impl,
 			capture_multi = null_impl,
@@ -240,3 +241,5 @@ local function to_ngx(method, uri, header, body, httpver, sock)
 
 	return setmetatable(ngx, {__index=ngx_base})
 end
+
+return create_wrapper

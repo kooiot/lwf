@@ -1,5 +1,4 @@
 
-local logger = require 'lwf.logger'
 local lpeg = require 'lpeg'
 --local cjson = require 'cjson.safe'
 local cjson = require 'cjson'

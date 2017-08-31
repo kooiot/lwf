@@ -85,7 +85,7 @@ function class:add(key, value, exptime, flags)
 			return false, err
 		end
 		self:push_key(key)
-		return true, 'ok' false
+		return true, 'ok', false
 	end
 	return false, 'exists'
 end
@@ -109,7 +109,7 @@ function class:replace(key, value, exptime, flags)
 		if not r then
 			return false, err
 		end
-		return true, 'ok' false
+		return true, 'ok', false
 	end
 	return false, 'not found'
 end
