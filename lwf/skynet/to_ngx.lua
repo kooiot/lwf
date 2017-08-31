@@ -4,17 +4,25 @@ local md5 = require 'md5'
 local urllib = require 'http.url'
 local crypt = require 'skynet.crypt'
 local sockethelper = require "http.sockethelper"
+local shared = require 'lwf.skynet.shared'
 
-local http_methods = {
+local ngx_base = {
+	OK = 0,
+	ERROR = -1,
+	AGAIN = -2,
+	DONE = -4,
+	DECLINED = -5,
+	null = cjson.null,
+
+	-- HTTP Methods
 	HTTP_GET = "GET",
 	HTTP_HEAD = "HEAD",
 	HTTP_PUT = "PUT",
 	HTTP_POST = "POST",
 	HTTP_DELETE = "DELETE",
 	HTTP_OPTIONS = "OPTIONS",
-}
 
-local http_status_constants = {
+	-- HTTP STATUS CONSTRANTS
 	HTTP_CONTINUE = 100,
 	HTTP_SWITCHING_PROTOCOLS = 101,
 	HTTP_OK = 200,
@@ -49,9 +57,8 @@ local http_status_constants = {
 	HTTP_GATEWAY_TIMEOUT = 504,
 	HTTP_VERSION_NOT_SUPPORTED = 505,
 	HTTP_INSUFFICIENT_STORAGE = 507,
-}
 
-local http_log_level = {
+	-- HTTP LOG LEVEL constants
 	STDERR = 'stderr',
 	EMERG = 'emerg',
 	ALERT = 'alert',
@@ -78,7 +85,14 @@ local function response(sock, ...)
 	end
 end
 
-local shared = {}
+local function shared_index = function(tab, key)
+	local s = rawget(tab, key)
+	if not s then
+		s = shared.new(key)
+		rawset(tab, key, s)
+	end
+	return s
+end
 
 local function to_ngx(method, uri, header, body, httpver, sock)
 	local to_ngx_req = require 'lwf.skynet.to_ngx_req'
@@ -86,12 +100,6 @@ local function to_ngx(method, uri, header, body, httpver, sock)
 	local path, query = urllib.parse(uri)
 	assert(header)
 	local ngx = {
-		OK = 0,
-		ERROR = -1,
-		AGAIN = -2,
-		DONE = -4,
-		DECLINED = -5,
-		null = cjson.null,
 		var = {
 			method = method,
 			header = header,
@@ -228,5 +236,7 @@ local function to_ngx(method, uri, header, body, httpver, sock)
 		end,
 	}
 	--TODO:
-	ngx.shared = shared
+	ngx.shared = setmetatable({}, {__index=shared_index})
+
+	return setmetatable(ngx, {__index=ngx_base})
 end
