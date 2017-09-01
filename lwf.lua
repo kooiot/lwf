@@ -3,15 +3,18 @@ local lfs = require 'lfs'
 
 local class = {}
 
-function class:load_config(resty_route)
+function class:load_config(resty_route, resty_template)
 	local route = self._route
 	if not route then
 		route = resty_route.new()
 		util.loadfile(self._lwf_root..'/config/route.lua', {route=route})
 		self._route = route
+
 		route:fs(self._lwf_root.."/controller")
 
-		--route:on("error", function(self) end)
+		route:on("error", function(self, code) 
+			return resty_template.render("view/error.html", {code = code})
+		end)
 	end
 end
 
@@ -25,10 +28,11 @@ function class:handle(...)
 	local resty_route = require 'resty.route'
 	local resty_template = require 'resty.template'
 
-	self:load_config(resty_route)
+	self:load_config(resty_route, resty_template)
 
-	_ENV.render = function(tfile, ...)
-		return resty_template.render("view/"..tfile, ...)
+	_ENV.render = function(tfile, context)
+		context.html = context.html or require 'resty.template.html'
+		return resty_template.render("view/"..tfile, context)
 	end
 
 	self._route:dispatch(ngx.var.uri, ngx.var.method)

@@ -80,6 +80,7 @@ local ngx_base = {
 }
 
 local ngx_log = function(level, ...)
+	print('log', level, ...)
 end
 
 local null_impl = function()
