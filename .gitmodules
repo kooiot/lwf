@@ -16,3 +16,6 @@
 [submodule "3rd/lua-resty-validation"]
 	path = 3rd/lua-resty-validation
 	url = https://github.com/bungle/lua-resty-validation.git
+[submodule "3rd/lua-resty-websocket"]
+	path = 3rd/lua-resty-websocket
+	url = https://github.com/openresty/lua-resty-websocket.git

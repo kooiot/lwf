@@ -69,6 +69,15 @@ local ngx_base = {
 	NOTICE = 'notice',
 	INFO = 'info',
 	DEBUG = 'debug',
+
+	config = {
+		subsystem = 'http',
+		debug = false,
+		prefix = function() return '' end,
+		nginx_version = '1.4.3',
+		nginx_configure = function() return '' end,
+		ngx_lua_version = '0.9.3',
+	},
 }
 
 local ngx_log = function(level, ...)
@@ -95,30 +104,43 @@ local function shared_index(tab, key)
 	return s
 end
 
-local function create_wrapper(method, uri, header, body, httpver, sock)
+function ngx_base:bind(method, uri, header, body, httpver, sock)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
 	local path, query = urllib.parse(uri)
 	assert(header)
+
+	self.var.method = method
+	self.var.header = header
+	self.var.uri = uri
+	self.var.path = path
+	self.var.args = query
+
+	self.req = to_ngx_req(self, body, httpver, socket)
+	self.resp = to_ngx_resp(self)
+	self.ctx = {}
+	self.status = 200
+end
+
+local function create_wrapper()
 	local ngx = {
-		var = {
-			method = method,
-			header = header,
-			uri = uri,
-			path = path,
-			args = query,
-		},
+		var = {},
 		arg = {},
 		ctx = {},
-		location = {
-			capture = null_impl,
-			capture_multi = null_impl,
-		},
+		location = {},
 		status = 200,
 	}
-	ngx.req = to_ngx_req(ngx, body, httpver, socket)
-	local resp = to_ngx_resp(ngx)
-	ngx.resp = resp
+	ngx.location.capture = function(uri, options)
+		assert(false, "NOT Implemented")
+	end
+	ngx.location.capture_multi = function(list)
+		local res = {}
+		for _, v in ipairs(list) do
+			res[#res + 1] = ngx.location.capture(table.unpack(v))
+		end
+		return table.unpack(res)
+	end
+
 	ngx.exec = function(uri, args)
 		assert(nil, uri, args)
 	end
@@ -131,18 +153,18 @@ local function create_wrapper(method, uri, header, body, httpver, sock)
 	end
 	ngx.headers_send = false
 	ngx.print = function(...) 
-		resp.append_body(...)
+		ngx.resp.append_body(...)
 	end
 	ngx.say = function(...)
-		resp.append_body(...)
-		resp.append_body("\r\n")
+		ngx.resp.append_body(...)
+		ngx.resp.append_body("\r\n")
 	end
 	ngx.log = ngx_log
 	ngx.flush = function(wait)
-		return response(sock, ngx.status, resp.get_body(), resp.get_headers())
+		return response(sock, ngx.status, ngx.resp.get_body(), ngx.resp.get_headers())
 	end
 	ngx.exit = function(status)
-		return response(sock, status, resp.get_body(), resp.get_headers())
+		return response(sock, status, ngx.resp.get_body(), ngx.resp.get_headers())
 	end
 	ngx.eof = function() end
 	ngx.sleep = function(seconds)
@@ -238,6 +260,10 @@ local function create_wrapper(method, uri, header, body, httpver, sock)
 	}
 	--TODO:
 	ngx.shared = setmetatable({}, {__index=shared_index})
+
+	ngx.get_phase = function()
+		return 'content'
+	end
 
 	return setmetatable(ngx, {__index=ngx_base})
 end

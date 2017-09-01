@@ -1,6 +1,5 @@
 
 local lpeg = require 'lpeg'
---local cjson = require 'cjson.safe'
 local cjson = require 'cjson'
 local unpack = table.unpack or unpack
 
