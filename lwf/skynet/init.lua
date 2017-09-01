@@ -3,7 +3,6 @@ local cjson = require 'cjson'
 local md5 = require 'md5'
 local urllib = require 'http.url'
 local crypt = require 'skynet.crypt'
-local sockethelper = require "http.sockethelper"
 local shared = require 'lwf.skynet.shared'
 local util = require 'lwf.util'
 
@@ -87,14 +86,6 @@ local null_impl = function()
 	assert(false, 'Not implementation')
 end
 
-local function response(sock, ...)
-	local ok, err = httpd.write_response(sockethelper.writefunc(sock), ...)
-	if not ok then
-		-- if err == sockethelper.socket_error , that means socket closed.
-		skynet.error(string.format("fd = %d, %s", sock, err))
-	end
-end
-
 local function shared_index(tab, key)
 	local s = rawget(tab, key)
 	if not s then
@@ -104,27 +95,36 @@ local function shared_index(tab, key)
 	return s
 end
 
-function ngx_base:bind(method, uri, header, body, httpver, sock)
+function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
 	local path, query = urllib.parse(uri)
 	assert(header)
 
 	self.var.method = method
+	self.var.request_method = method
 	self.var.header = header
 	self.var.uri = uri
 	self.var.path = path
 	self.var.args = query
+	self.var.write_response = response
+	self.var.socket = sock
 
-	self.req = to_ngx_req(self, body, httpver, socket)
+	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
 	self.ctx = {}
 	self.status = 200
 end
 
-local function create_wrapper()
+local function response(ngx, ...)
+	return ngx.var.write_response(ngx.var.socket, ...)
+end
+
+local function create_wrapper(doc_root)
 	local ngx = {
-		var = {},
+		var = {
+			document_root = doc_root
+		},
 		arg = {},
 		ctx = {},
 		location = {},
@@ -146,7 +146,7 @@ local function create_wrapper()
 	end
 	ngx.redirect = function(uri, status)
 		local status = status or 302
-		response(sock, status, ngx.resp.get_body(), ngx.resp.get_headers())
+		response(ngx, status, ngx.resp.get_body(), ngx.resp.get_headers())
 	end
 	ngx.send_headers = function()
 		assert(nil, "NNNN")
@@ -161,10 +161,10 @@ local function create_wrapper()
 	end
 	ngx.log = ngx_log
 	ngx.flush = function(wait)
-		return response(sock, ngx.status, ngx.resp.get_body(), ngx.resp.get_headers())
+		return response(ngx, ngx.status, ngx.resp.get_body(), ngx.resp.get_headers())
 	end
 	ngx.exit = function(status)
-		return response(sock, status, ngx.resp.get_body(), ngx.resp.get_headers())
+		return response(ngx, status, ngx.resp.get_body(), ngx.resp.get_headers())
 	end
 	ngx.eof = function() end
 	ngx.sleep = function(seconds)
@@ -241,23 +241,7 @@ local function create_wrapper()
 		assert(false)
 	end
 	ngx.is_subrequest = function() return false end
-	ngx.re = {
-		match = function(subject, regex, options, ctx, res_table)
-			assert(false)
-		end,
-		find = function(subject, regex, options, ctx, nth)
-			assert(false)
-		end,
-		gmatch = function(subject, regex, options)
-			assert(false)
-		end,
-		sub = function(subject, regex, replace, options)
-			assert(false)
-		end,
-		gsub = function(subject, regex, replace, options)
-			assert(false)
-		end,
-	}
+	ngx.re = require 'lwf.skynet.re' 
 	--TODO:
 	ngx.shared = setmetatable({}, {__index=shared_index})
 

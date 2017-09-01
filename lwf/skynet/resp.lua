@@ -8,7 +8,7 @@ local function to_ngx_resp(var)
 		add_header = function(header_name, header_value)
 			headers[header_name] = header_value
 		end,
-		get_body = function() return body end,
+		get_body = function() return table.concat(body) end,
 		append_body = function(...) 
 			for _,v in ipairs({...}) do
 				body[#body + 1] = v

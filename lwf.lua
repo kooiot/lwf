@@ -28,15 +28,10 @@ function class:handle(...)
 	self:load_config(resty_route)
 
 	_ENV.render = function(tfile, ...)
-		print(tfile, ...)
-		resty_template.render(self._lwf_root.."/view/"..tfile, ...)
+		return resty_template.render("view/"..tfile, ...)
 	end
 
-	self._route:use(function(self)
-		print('xxxxx')
-		self.yield(1, 2)
-		print('xxxxx')
-	end)
+	self._route:dispatch(ngx.var.uri, ngx.var.method)
 end
 
 local class_meta = {
@@ -48,10 +43,12 @@ local class_meta = {
 
 return {
 	new = function(lwf_root, wrap_func)
+		local lwf_root = lwf_root or "."
+		local wrap_func = wrap_func or function() end
 		return setmetatable({
 			_route = nil,
 			_lwf_root = lwf_root,
-			_ngx = wrap_func(),
+			_ngx = wrap_func(lwf_root),
 		}, class_meta)
 	end
 }

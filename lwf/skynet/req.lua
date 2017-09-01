@@ -135,7 +135,7 @@ local function parse_post_data(header, body, tab, overwrite)
 end
 
 
-local function to_ngx_req(ngx, body, httpver, sockethelper)
+local function to_ngx_req(ngx, body, httpver)
 	assert(ngx)
 	local var = ngx.var
 	local start_time = skynet.now()
@@ -199,7 +199,9 @@ local function to_ngx_req(ngx, body, httpver, sockethelper)
 		finish_body = function()
 			post_args = parse_post_data(var.header, body)
 		end,
-		socket = sockethelper,
+		socket = function()
+			return var.socket
+		end,
 	}
 end
 

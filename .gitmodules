@@ -19,3 +19,6 @@
 [submodule "3rd/lua-resty-websocket"]
 	path = 3rd/lua-resty-websocket
 	url = https://github.com/openresty/lua-resty-websocket.git
+[submodule "3rd/RegExpUtils"]
+	path = 3rd/RegExpUtils
+	url = https://github.com/NexusInstruments/RegExpUtils.git
