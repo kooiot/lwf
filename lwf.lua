@@ -13,12 +13,14 @@ function class:load_config(resty_route, resty_template)
 	if not route then
 		route = resty_route.new()
 
+		--[[
 		load_middleware(route, 'ajax')
 		load_middleware(route, 'form')
 		load_middleware(route, 'pjax')
 		--load_middleware(route, 'redis')
 		load_middleware(route, 'reqargs')
 		load_middleware(route, 'template')
+		]]--
 
 		local env = setmetatable({route=route, template=resty_template}, {__index=_ENV})
 		util.loadfile(self._lwf_root..'/config/route.lua', env)
