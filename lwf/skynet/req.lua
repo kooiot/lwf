@@ -145,7 +145,7 @@ local function to_ngx_req(ngx, body, httpver)
 		is_internal = function() return false end,
 		start_time = start_time,
 		http_version = httpver,
-		raw_header = var.header,
+		raw_header = function(no_request_line) return ngx.var.header end,
 		get_method = function() return var.method end,
 		set_method = function(m) var.method = m end,
 		set_uri = function(uri, jump) 

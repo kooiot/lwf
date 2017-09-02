@@ -1,12 +1,15 @@
 
-local function to_ngx_resp(var)
-	local var = var
+local function to_ngx_resp(ngx)
+	local ngx = ngx
 	local headers = {}
 	local body = {}
 	return {
 		get_headers = function() return headers end,
-		add_header = function(header_name, header_value)
+		set_header = function(header_name, header_value)
 			headers[header_name] = header_value
+		end,
+		get_header = function(header_name)
+			return headers[header_name]
 		end,
 		get_body = function() return table.concat(body) end,
 		append_body = function(...) 

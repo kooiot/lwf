@@ -131,6 +131,12 @@ local function create_wrapper(doc_root)
 		location = {},
 		status = 200,
 	}
+	ngx.header = setmetatable({}, {
+		__newindex = function(tab, key, value) 
+			ngx.resp.set_header(key, value)
+		end,
+		__index=function(tab, key) return ngx.var.header[key] or ngx.resp.get_header(key) end,
+	})
 	ngx.location.capture = function(uri, options)
 		assert(false, "NOT Implemented")
 	end
