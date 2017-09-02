@@ -3,18 +3,33 @@ local lfs = require 'lfs'
 
 local class = {}
 
+local function load_middleware(route, name)
+	local m = require('resty.route.middleware.'..name)
+	return m(route)
+end
+
 function class:load_config(resty_route, resty_template)
 	local route = self._route
 	if not route then
 		route = resty_route.new()
-		util.loadfile(self._lwf_root..'/config/route.lua', {route=route})
-		self._route = route
+
+		load_middleware(route, 'ajax')
+		load_middleware(route, 'form')
+		load_middleware(route, 'pjax')
+		--load_middleware(route, 'redis')
+		load_middleware(route, 'reqargs')
+		load_middleware(route, 'template')
+
+		local env = setmetatable({route=route, template=resty_template}, {__index=_ENV})
+		util.loadfile(self._lwf_root..'/config/route.lua', env)
 
 		route:fs(self._lwf_root.."/controller")
 
 		route:on("error", function(self, code) 
 			return resty_template.render("view/error.html", {code = code})
 		end)
+
+		self._route = route
 	end
 end
 

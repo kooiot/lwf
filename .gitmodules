@@ -4,9 +4,6 @@
 [submodule "3rd/lua-resty-reqargs"]
 	path = 3rd/lua-resty-reqargs
 	url = https://github.com/bungle/lua-resty-reqargs.git
-[submodule "3rd/lua-resty-route"]
-	path = 3rd/lua-resty-route
-	url = https://github.com/bungle/lua-resty-route.git
 [submodule "3rd/lua-resty-session"]
 	path = 3rd/lua-resty-session
 	url = https://github.com/bungle/lua-resty-session.git
@@ -22,3 +19,6 @@
 [submodule "3rd/RegExpUtils"]
 	path = 3rd/RegExpUtils
 	url = https://github.com/NexusInstruments/RegExpUtils.git
+[submodule "3rd/lua-resty-upload"]
+	path = 3rd/lua-resty-upload
+	url = https://github.com/openresty/lua-resty-upload.git
