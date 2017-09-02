@@ -172,7 +172,7 @@ local function to_ngx_req(ngx, body, httpver)
 		get_post_args = function()
 			return post_args
 		end,
-		get_header = function()
+		get_headers = function()
 			return var.header
 		end,
 		set_header = function(header_name, header_value)

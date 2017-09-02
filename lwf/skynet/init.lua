@@ -96,6 +96,24 @@ local function shared_index(tab, key)
 	return s
 end
 
+local function to_ngx_header(header)
+	local re = {}
+	for k,v in pairs(header) do
+		local key = string.gsub(k, "-", "_")
+		re[key] = v
+	end
+	return re
+end
+
+local function dump_ngx_header(header)
+	local re = {}
+	for k,v in pairs(header) do
+		local key = string.gsub(k, "_", "-")
+		re[key] = v
+	end
+	return re
+end
+
 function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
@@ -103,8 +121,8 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	assert(header)
 
 	self.var.method = method
+	self.var.header = to_ngx_header(header)
 	self.var.request_method = method
-	self.var.header = header
 	self.var.uri = uri
 	self.var.path = path
 	self.var.args = query
@@ -153,7 +171,8 @@ local function create_wrapper(doc_root)
 	end
 	ngx.redirect = function(uri, status)
 		local status = status or 302
-		response(ngx, status, ngx.resp.get_body(), ngx.resp.get_headers())
+		local header = dump_ngx_header(ngx.resp.get_headers())
+		response(ngx, status, ngx.resp.get_body(), header)
 	end
 	ngx.send_headers = function()
 		assert(nil, "NNNN")
@@ -168,10 +187,12 @@ local function create_wrapper(doc_root)
 	end
 	ngx.log = ngx_log
 	ngx.flush = function(wait)
-		return response(ngx, ngx.status, ngx.resp.get_body(), ngx.resp.get_headers())
+		local header = dump_ngx_header(ngx.resp.get_headers())
+		return response(ngx, ngx.status, ngx.resp.get_body(), header)
 	end
 	ngx.exit = function(status)
-		return response(ngx, status, ngx.resp.get_body(), ngx.resp.get_headers())
+		local header = dump_ngx_header(ngx.resp.get_headers())
+		return response(ngx, status, ngx.resp.get_body(), header)
 	end
 	ngx.eof = function() end
 	ngx.sleep = function(seconds)
