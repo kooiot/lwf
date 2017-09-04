@@ -128,6 +128,8 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	self.var.args = query
 	self.var.write_response = response
 	self.var.socket = sock
+	self.var.scheme = 'http'
+	self.http_user_agent = self.var.header.user_agent
 
 	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
