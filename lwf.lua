@@ -8,25 +8,29 @@ local function load_middleware(route, name)
 	return m(route)
 end
 
-function class:load_config(resty_route, resty_template)
+local function create_context(route, context)
+	return setmetatable(context or {}, {__index=route})
+end
+
+function class:load_config()
 	if not self._loaded then
+		local resty_route = require 'resty.route'
 		local route = resty_route.new()
 
-		--[[
 		load_middleware(route, 'ajax')
 		load_middleware(route, 'form')
 		load_middleware(route, 'pjax')
 		--load_middleware(route, 'redis')
 		load_middleware(route, 'reqargs')
 		load_middleware(route, 'template')
-		]]--
 
+		local template = route.template
 		local env = setmetatable({
 			route=route,
 			lwf = {
-				template = resty_template,
+				template = template,
 				render = function(content, context)
-					return resty_template.render("view/"..content, context)
+					return template.render("view/"..content, context)
 				end,
 			},
 		}, {__index=_ENV})
@@ -35,7 +39,7 @@ function class:load_config(resty_route, resty_template)
 		route:fs(self._lwf_root.."/controller")
 
 		route:on("error", function(self, code) 
-			return resty_template.render("view/error.html", {code = code})
+			return template.render("view/error.html", create_context(self, {code = code}))
 		end)
 
 		self._route = route
@@ -49,6 +53,7 @@ function class:load_config(resty_route, resty_template)
 
 		self._loaded = true
 	end
+	return self._route
 end
 
 function class:handle(...)
@@ -58,16 +63,14 @@ function class:handle(...)
 		_ENV.ngx = lngx
 	end
 
-	local resty_route = require 'resty.route'
-	local resty_template = require 'resty.template'
-
-	self:load_config(resty_route, resty_template)
+	local route = self:load_config()
+	local template = route.template
 
 	_ENV.lwf = {
-		template = resty_template,
+		template = template,
 		render = function(tfile, context)
 			context.html = context.html or require 'resty.template.html'
-			return resty_template.render("view/"..tfile, context)
+			return template.render("view/"..tfile, context)
 		end,
 		session = require 'resty.session'.start(self._session)
 	}
