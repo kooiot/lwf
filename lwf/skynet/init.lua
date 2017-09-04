@@ -124,13 +124,13 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 
 	self.var.method = method
 	self.var.header = header
+	self.var.scheme = 'http'
 	self.var.request_method = method
-	self.var.uri = uri
-	self.var.path = path
+	self.var.request_uri = uri
+	self.var.uri = path
 	self.var.args = query --TODO: set the value of this args will affect the self.var.arg_xxxx
 	self.var.write_response = response
 	self.var.socket = sock
-	self.var.scheme = 'http'
 	self.http_user_agent = self.var.header.user_agent
 
 	local args = urllib.parse_query(query) or {}
