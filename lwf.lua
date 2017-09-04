@@ -15,24 +15,13 @@ end
 function class:load_config()
 	if not self._loaded then
 		local resty_route = require 'resty.route'
+		local template = require 'resty.template'
 		local route = resty_route.new()
+		route._NAME = route._NAME or "route"
 
-		load_middleware(route, 'ajax')
-		load_middleware(route, 'form')
-		load_middleware(route, 'pjax')
-		--load_middleware(route, 'redis')
-		load_middleware(route, 'reqargs')
-		load_middleware(route, 'template')
-
-		local template = route.template
 		local env = setmetatable({
+			_NAME = "LWF_ENV",
 			route=route,
-			lwf = {
-				template = template,
-				render = function(content, context)
-					return template.render("view/"..content, context)
-				end,
-			},
 		}, {__index=_ENV})
 		util.loadfile(self._lwf_root..'/config/route.lua', env)
 
@@ -64,17 +53,25 @@ function class:handle(...)
 	end
 
 	local route = self:load_config()
-	local template = route.template
+
+	local template = require 'resty.template'
+	local reqargs = require 'resty.reqargs'
 
 	_ENV.lwf = {
+		_NAME = "LWF_ENV",
+		route = route,
 		template = template,
+		reqargs = reqargs,
 		render = function(tfile, context)
 			context.html = context.html or require 'resty.template.html'
 			return template.render("view/"..tfile, context)
 		end,
-		session = require 'resty.session'.start(self._session)
+		session = require 'resty.session'.start(self._session),
+		json = function(self, data)
+			return self:json(data)
+		end,
 	}
-	self._route:dispatch(ngx.var.uri, ngx.var.method)
+	self._route:dispatch()
 end
 
 local class_meta = {
