@@ -117,40 +117,22 @@ end
 function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
-	local path, query = urllib.parse(uri)
+	local to_ngx_var = require 'lwf.skynet.var'
 
 	assert(header)
 	local header = to_ngx_header(header)
-
-	self.var.method = method
-	self.var.header = header
-	self.var.scheme = 'http'
-	self.var.request_method = method
-	self.var.request_uri = uri
-	self.var.uri = path
-	self.var.args = query --TODO: set the value of this args will affect the self.var.arg_xxxx
-	self.var.write_response = response
-	self.var.socket = sock
-	self.http_user_agent = self.var.header.user_agent
-
-	local args = urllib.parse_query(query) or {}
-	for k,v in pairs(args) do
-		self.var['arg_'..k] = v
-	end
-	local cookies = util.parse_cookie_string(header.cookie)
-	self.var.cookies = cookies
-	for k,v in pairs(cookies) do
-		self.var['cookie_'..k] = v
-	end
+	self.var = to_ngx_var(method, uri, header, body, sock)
 
 	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
 	self.ctx = {}
 	self.status = 200
+	self.write_response = response
+	self.socket = sock
 end
 
 local function response(ngx, ...)
-	return ngx.var.write_response(ngx.var.socket, ...)
+	return ngx.write_response(ngx.var.socket or ngx.socket, ...)
 end
 
 local function create_wrapper(doc_root)
