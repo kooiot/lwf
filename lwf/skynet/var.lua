@@ -44,7 +44,7 @@ local function create_var(method, uri, header, body, sock)
 				return var.header[k] or var[index]
 			end
 		end
-		return var[index]
+		return var[index] or var.header[index]
 	end
 
 	local function var_new_index(tab, index, value)

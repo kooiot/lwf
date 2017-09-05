@@ -32,6 +32,7 @@ function class:load_config()
 		end)
 
 		self._route = route
+
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
 			secret = "0cc312cbaedad75820792070d720dbda"
 		}
