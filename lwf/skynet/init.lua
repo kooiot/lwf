@@ -123,6 +123,8 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	local header = to_ngx_header(header)
 	self.var = to_ngx_var(method, uri, header, body, sock)
 
+	self.var.document_root = self.document_root
+
 	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
 	self.ctx = {}
@@ -137,9 +139,7 @@ end
 
 local function create_wrapper(doc_root)
 	local ngx = {
-		var = {
-			document_root = doc_root
-		},
+		document_root = doc_root,
 		arg = {},
 		ctx = {},
 		location = {},
