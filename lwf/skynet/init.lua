@@ -117,13 +117,10 @@ end
 function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	local to_ngx_req = require 'lwf.skynet.req'
 	local to_ngx_resp = require 'lwf.skynet.resp'
-	local to_ngx_var = require 'lwf.skynet.var'
 
 	assert(header)
 	local header = to_ngx_header(header)
-	self.var = to_ngx_var(method, uri, header, body, sock)
-
-	self.var.document_root = self.document_root
+	self.var:bind(method, uri, header, body, sock)
 
 	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
@@ -138,8 +135,10 @@ local function response(ngx, ...)
 end
 
 local function create_wrapper(doc_root)
+	local to_ngx_var = require 'lwf.skynet.var'
+	local ngx_var = to_ngx_var(doc_root)
 	local ngx = {
-		document_root = doc_root,
+		var = ngx_var,
 		arg = {},
 		ctx = {},
 		location = {},

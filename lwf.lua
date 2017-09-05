@@ -28,19 +28,15 @@ function class:load_config()
 		route:fs(self._lwf_root.."/controller")
 
 		route:on("error", function(self, code) 
-			return template.render("view/error.html", create_context(self, {code = code}))
+			return template.render("error.html", create_context(self, {code = code}))
 		end)
-
-		self._route = route
 
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
 			secret = "0cc312cbaedad75820792070d720dbda"
 		}
 		self._session['cipher'] = 'none'
-		for k,v in pairs(self._session) do
-			ngx.var['session_'..k] = v
-		end
 
+		self._route = route
 		self._loaded = true
 	end
 	return self._route
@@ -65,7 +61,7 @@ function class:handle(...)
 		reqargs = reqargs,
 		render = function(tfile, context)
 			context.html = context.html or require 'resty.template.html'
-			return template.render("view/"..tfile, context)
+			return template.render(tfile, context)
 		end,
 		session = require 'resty.session'.start(self._session),
 		json = function(self, data)
@@ -90,7 +86,7 @@ return {
 			_loaded = nil,
 			_route = nil,
 			_lwf_root = lwf_root,
-			_ngx = wrap_func(lwf_root),
+			_ngx = wrap_func(lwf_root.."/view"),
 		}, class_meta)
 	end
 }
