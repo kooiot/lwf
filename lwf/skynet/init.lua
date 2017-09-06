@@ -166,6 +166,7 @@ local function create_wrapper(doc_root)
 	end
 	ngx.redirect = function(uri, status)
 		local status = status or 302
+		ngx.resp.set_header('Location', uri)
 		local header = dump_ngx_header(ngx.resp.get_headers())
 		response(ngx, status, ngx.resp.get_body(), header)
 	end

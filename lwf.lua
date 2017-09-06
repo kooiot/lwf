@@ -82,16 +82,6 @@ function class:load_config()
 		route:on("error", function(self, code) 
 			return template.render("error.html", create_context(self, {code = code}))
 		end)
-		route('=*/zh', function(self)
-			lwf.session.data.lang = 'zh_CN'
-			lwf.session:save()
-			self:redirect('/')
-		end)
-		route('=*/en', function(self)
-			lwf.session.data.lang = 'en_US'
-			lwf.session:save()
-			self:redirect('/')
-		end)
 
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
 			secret = "0cc312cbaedad75820792070d720dbda"
