@@ -25,3 +25,6 @@
 [submodule "3rd/lua-resty-route"]
 	path = 3rd/lua-resty-route
 	url = https://github.com/srdgame/lua-resty-route.git
+[submodule "3rd/lua-resty-auth"]
+	path = 3rd/lua-resty-auth
+	url = https://github.com/duhoobo/lua-resty-auth.git

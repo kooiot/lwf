@@ -3,15 +3,16 @@ route("=*/help", function(self)
 	lwf.render("help.html", {})
 end)
 
-route('=*/zh', function(self)
-	lwf.session.data.lang = 'zh_CN'
-	lwf.session:save()
-	self:redirect('/')
-end)
-route('=*/en', function(self)
-	lwf.session.data.lang = 'en_US'
+route('#/lang/(.+)', function(self, lang)
+	lwf.session.data.lang = lang or 'zh_CN'
 	lwf.session:save()
 	self:redirect('/')
 end)
 
+--[[
+route('#/zh/(.+)', function(self, url)
+	ngx.header['Accpet-Language'] = 'zh_CN'
+	self:exec(url, {})
+end)
+]]--
 
