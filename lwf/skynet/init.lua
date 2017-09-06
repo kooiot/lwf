@@ -187,7 +187,7 @@ local function create_wrapper(doc_root)
 	end
 	ngx.exit = function(status)
 		local header = dump_ngx_header(ngx.resp.get_headers())
-		return response(ngx, status, ngx.resp.get_body(), header)
+		return response(ngx, status or ngx.status, ngx.resp.get_body(), header)
 	end
 	ngx.eof = function() end
 	ngx.sleep = function(seconds)

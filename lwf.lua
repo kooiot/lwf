@@ -27,8 +27,14 @@ function class:load_config()
 
 		route:fs(self._lwf_root.."/controller")
 
-		route:on("error", function(self, code) 
-			return template.render("error.html", create_context(self, {code = code}))
+		if self._assets_func then
+			route("#/assets/(.+)", function(router, file)
+				return self._assets_func(self._lwf_root.."/assets", file)
+			end)
+		end
+
+		route:on("error", function(router, code) 
+			return template.render("error.html", create_context(router, {code = code}))
 		end)
 
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
@@ -79,7 +85,7 @@ local class_meta = {
 }
 
 return {
-	new = function(lwf_root, wrap_func)
+	new = function(lwf_root, wrap_func, assets_func)
 		local lwf_root = lwf_root or "."
 		local wrap_func = wrap_func or function() end
 		return setmetatable({
@@ -87,6 +93,7 @@ return {
 			_route = nil,
 			_lwf_root = lwf_root,
 			_ngx = wrap_func(lwf_root.."/view"),
+			_assets_func = assets_func
 		}, class_meta)
 	end
 }
