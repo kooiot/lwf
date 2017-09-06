@@ -182,6 +182,7 @@ local function create_wrapper(doc_root)
 	end
 	ngx.log = ngx_log
 	ngx.flush = function(wait)
+		assert(false, "flush fake!")
 		local header = dump_ngx_header(ngx.resp.get_headers())
 		return response(ngx, ngx.status, ngx.resp.get_body(), header)
 	end
@@ -189,7 +190,7 @@ local function create_wrapper(doc_root)
 		local header = dump_ngx_header(ngx.resp.get_headers())
 		return response(ngx, status or ngx.status, ngx.resp.get_body(), header)
 	end
-	ngx.eof = function() end
+	ngx.eof = function() return true end
 	ngx.sleep = function(seconds)
 		skynet.sleep(seconds * 100)
 	end

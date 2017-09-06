@@ -1,7 +1,7 @@
 local lfs = require "lfs"
 local util = require "lwf.util"
-local mime = require "lwf.platform.skynet.mime"
-local enc = require "lwf.platform.skynet.encoding"
+local mime = require "lwf.skynet.mime"
+local enc = require "lwf.skynet.encoding"
 
 -- gets the mimetype from the filename's extension
 local function mimefrompath (path)
@@ -85,7 +85,7 @@ local function in_base(path)
 end
 
 -- main handler
-local function filehandler(ngx, router, root, file)
+local function handler(ngx, router, root, file)
 	local method = ngx.var.method
 	if method ~= "GET" and method ~= "HEAD" then
 		return router:exit(405)
@@ -121,10 +121,10 @@ local function filehandler(ngx, router, root, file)
 		return router:exit(404)
 	end
 
-	ngx.header["last-modified"] = os.date("!%a, %d %b %Y %H:%M:%S GMT", attr.modification)
+	local lm = os.date("!%a, %d %b %Y %H:%M:%S GMT", attr.modification)
+	ngx.header["last-modified"] = lm
 
-	local lms = ngx.header["if-modified-since"] or 0
-	local lm = ngx.header["last-modified"] or 1
+	local lms = ngx.var.header["if_modified_since"] or 0
 	if lms == lm then
 		return router:exit(304)
 	end
@@ -145,7 +145,7 @@ end
 return function (ngx)
 	local ngx = ngx
 	return function (router, root, file)
-		return filehandler(ngx, router, root, file)
+		return handler(ngx, router, root, file)
 	end
 end
 
