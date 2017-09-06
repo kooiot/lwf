@@ -1,7 +1,11 @@
 
 local function to_ngx_resp(ngx)
 	local ngx = ngx
-	local headers = {}
+	local headers = {
+		content_type = 'text/html; charset=utf-8',
+		server = 'skynet/lwf',
+		date = ngx.http_time(math.floor(ngx.now())),
+	}
 	local body = {}
 	return {
 		get_headers = function() return headers end,

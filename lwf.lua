@@ -1,5 +1,6 @@
-local util = require 'lwf.util'
 local lfs = require 'lfs'
+local util = require 'lwf.util'
+local i18n = require 'lwf.i18n'
 
 local class = {}
 
@@ -10,6 +11,49 @@ end
 
 local function create_context(route, context)
 	return setmetatable(context or {}, {__index=route})
+end
+
+local function load_i18n(root)
+	local attr = lfs.attributes(root)
+	if not attr or attr.mode ~= 'directory' then
+		return {}
+	end
+
+	local po = require 'lwf.util.po'
+	local dir = require 'lwf.util.dir'
+
+	dir.do_each(root, function(path)
+		local lang = path:match('.+/([^/]+)$')
+		if lang ~= 'template' then
+			po.attach(path, lang)
+		end
+	end)
+	return po.get_translations()
+end
+
+function class:get_translator(session)
+	local lang = nil
+	if session then
+		local lngx = self._ngx or ngx
+		lang = session.data.lang or util.guess_lang(lngx.var.header)
+	end
+
+	local translator = i18n.make_translator(self._translations, lang)
+	if self._base_lwf then
+		return i18n.make_fallback(translator, self._base_lwf:get_translator(session))
+	end
+
+	return translator
+	--[[
+	if self.base_app then
+		local ft = self.base_app.translations
+		local translator = i18n.make_translator(self.translations, lang)
+		local basetransaltor = i18n.make_translator(ft, lang)
+		return i18n.make_fallback(translator, basetransaltor)
+	else
+		return i18n.make_translator(self.translations, lang)
+	end
+	]]--
 end
 
 function class:load_config()
@@ -38,6 +82,16 @@ function class:load_config()
 		route:on("error", function(self, code) 
 			return template.render("error.html", create_context(self, {code = code}))
 		end)
+		route('=*/zh', function(self)
+			lwf.session.data.lang = 'zh_CN'
+			lwf.session:save()
+			self:redirect('/')
+		end)
+		route('=*/en', function(self)
+			lwf.session.data.lang = 'en_US'
+			lwf.session:save()
+			self:redirect('/')
+		end)
 
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
 			secret = "0cc312cbaedad75820792070d720dbda"
@@ -45,6 +99,7 @@ function class:load_config()
 		self._session['cipher'] = 'none'
 
 		self._route = route
+		self._translations = load_i18n(self._lwf_root.."/i18n")
 		self._loaded = true
 	end
 	return self._route
@@ -62,20 +117,30 @@ function class:handle(...)
 	local template = require 'resty.template'
 	local reqargs = require 'resty.reqargs'
 
+	local session = require('resty.session').start(self._session)
+	local translator = self:get_translator(session)
+
 	_ENV.lwf = {
 		_NAME = "LWF_ENV",
 		route = route,
 		template = template,
 		reqargs = reqargs,
-		render = function(tfile, context)
-			context.html = context.html or require 'resty.template.html'
-			return template.render(tfile, context)
-		end,
-		session = require 'resty.session'.start(self._session),
+		render = template.render,
+		session = session,
 		json = function(self, data)
 			return self:json(data)
 		end,
+		translate = translator.translate,
+		translatef = translator.translatef,
 	}
+	_ENV._ = function(...)
+		if select("#") == 1 then
+			return translator.translate(...)
+		end
+		return translator.translatef(...)
+	end
+	_ENV.html = require 'resty.template.html'
+
 	self._route:dispatch()
 end
 

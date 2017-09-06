@@ -380,8 +380,8 @@ _M.args_to_table = function(...)
 	return {...}
 end
 
-_M.guess_lang = function(req)
-	local accept_lang = req.headers['Accept-Language']
+_M.guess_lang = function(header)
+	local accept_lang = header['accept_language'] or header['Accept-Language']
 	if accept_lang then
 		accept_lang = accept_lang:match('^(.-),')
 	end
