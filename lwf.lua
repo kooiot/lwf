@@ -56,6 +56,21 @@ function class:get_translator(session)
 	]]--
 end
 
+function class:load_auth(config)
+	if not config then
+		return nil, "no Auth"
+	end
+
+	local auth = require 'resty.auth'
+	assert(auth.setup(config))
+
+	local config = config
+	self._auth = function()
+		local auth = require 'resty.auth'
+		auth.new(config.scheme, config.domain):auth()
+	end
+end
+
 function class:load_config()
 	if not self._loaded then
 		local resty_route = require 'resty.route'
@@ -90,6 +105,12 @@ function class:load_config()
 
 		self._route = route
 		self._translations = load_i18n(self._lwf_root.."/i18n")
+
+		local config, err = util.loadfile_as_table(self._lwf_root..'/config/auth.lua')
+		if config then
+			self:load_auth(config)
+		end
+
 		self._loaded = true
 	end
 	return self._route
@@ -131,6 +152,9 @@ function class:handle(...)
 	end
 	_ENV.html = require 'resty.template.html'
 
+	if self._auth then
+		self._auth()
+	end
 	self._route:dispatch()
 end
 

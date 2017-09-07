@@ -128,6 +128,8 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	self.status = 200
 	self.write_response = response
 	self.socket = sock
+
+	self.update_time()
 end
 
 local function response(ngx, ...)

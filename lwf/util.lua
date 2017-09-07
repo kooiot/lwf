@@ -337,10 +337,10 @@ function _M.loadfile_as_table(file, env)
 
 	local r, re = pcall(f)
 	if not r then
-		assert(r, re)
+		return nil, re
 	end
 
-	return r, new_env--setmetatable(new_env, {__index={}})
+	return re, new_env--setmetatable(new_env, {__index={}})
 end
 
 function _M.to_json (obj)
