@@ -61,6 +61,7 @@ function class:load_auth(config)
 		return nil, "no Auth"
 	end
 
+	--[[
 	local auth = require 'resty.auth'
 	assert(auth.setup(config))
 
@@ -69,6 +70,10 @@ function class:load_auth(config)
 		local auth = require 'resty.auth'
 		auth.new(config.scheme, config.domain):auth()
 	end
+	]]--
+end
+
+function class:get_auth(session)
 end
 
 function class:load_config()
@@ -121,6 +126,8 @@ function class:handle(...)
 	if lngx then
 		lngx:bind(...)
 		_ENV.ngx = lngx
+	else
+		lngx = ngx
 	end
 
 	local route = self:load_config()
@@ -130,14 +137,17 @@ function class:handle(...)
 
 	local session = require('resty.session').start(self._session)
 	local translator = self:get_translator(session)
+	local auth = self:get_auth(session)
 
 	_ENV.lwf = {
 		_NAME = "LWF_ENV",
+		ngx = lngx,
 		route = route,
 		template = template,
 		reqargs = reqargs,
 		render = template.render,
 		session = session,
+		auth = auth,
 		json = function(self, data)
 			return self:json(data)
 		end,
@@ -152,9 +162,6 @@ function class:handle(...)
 	end
 	_ENV.html = require 'resty.template.html'
 
-	if self._auth then
-		self._auth()
-	end
 	self._route:dispatch()
 end
 
