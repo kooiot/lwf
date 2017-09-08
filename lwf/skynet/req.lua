@@ -118,17 +118,17 @@ end
 
 local function parse_post_data(header, body, tab, overwrite)
   tab = tab or {}
-  local input_type = header["content-type"] or ""
+  local input_type = header["content_type"] or ""
   if string.find(input_type, "x-www-form-urlencoded", 1, true) then
-    local length = tonumber(header["content-length"]) or 0
+    local length = tonumber(header["content_length"]) or 0
     parse_qs(body:sub(1, length) or "", tab, overwrite)
   elseif string.find(input_type, "multipart/form-data", 1, true) then
-    local length = tonumber(header["content-length"]) or 0
+    local length = tonumber(header["content_length"]) or 0
     if length > 0 then
        parse_multipart_data(body:sub(1, length) or "", input_type, tab, overwrite)
     end
   else
-    local length = tonumber(header["content-length"]) or 0
+    local length = tonumber(header["content_length"]) or 0
     tab.post_data = body:sub(1, length) or ""
   end
   return tab
@@ -141,6 +141,7 @@ local function to_ngx_req(ngx, body, httpver)
 	local start_time = skynet.now()
 	local post_args = {}
 	local body = body
+	local __socket = nil
 	return {
 		is_internal = function() return false end,
 		start_time = start_time,
@@ -200,7 +201,12 @@ local function to_ngx_req(ngx, body, httpver)
 			post_args = parse_post_data(var.header, body)
 		end,
 		socket = function()
-			return var.socket
+			assert(false, "not implemented")
+			local to_ngx_socket = require 'lwf.skynet.socket'
+			if not __socket then
+				__socket = to_ngx_socket(ngx, body)
+			end
+			return __socket
 		end,
 	}
 end

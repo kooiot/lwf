@@ -63,17 +63,6 @@ function class:load_auth(config)
 
 	local auth = require 'lwf.auth' 
 	self._auth = auth(config.realm, config.auth)
-
-	--[[
-	local auth = require 'resty.auth'
-	assert(auth.setup(config))
-
-	local config = config
-	self._auth = function()
-		local auth = require 'resty.auth'
-		auth.new(config.scheme, config.domain):auth()
-	end
-	]]--
 end
 
 function class:get_auth(session)
@@ -90,14 +79,29 @@ function class:load_config()
 		local route = resty_route.new()
 		route._NAME = route._NAME or "route"
 
+		-- Loading auth module and auth routing
+		local config, err = util.loadfile_as_table(self._lwf_root..'/config/auth.lua')
+		if config then
+			self:load_auth(config)
+			local lwf_user = require 'lwf.user'
+			--[[
+			route:as(lwf_user)
+			route("=*/user/home", "@home")
+			]]--
+			route:post('=*/login', function(self) return lwf_user.login(self) end)
+			route:post('=*/logout', function(self) return lwf_user.logout(self) end)
+			route('=*/user/home', function(self) return lwf_user.home(self) end)
+		end
+
 		local env = setmetatable({
 			_NAME = "LWF_ENV",
 			route=route,
 		}, {__index=_ENV})
+
+		-- Loading configed routing
 		util.loadfile(self._lwf_root..'/config/route.lua', env)
 
-		route:fs(self._lwf_root.."/controller")
-
+		-- Static assets files
 		local assets = self._assets
 		if assets then
 			local assets_root = self._lwf_root.."/assets"
@@ -106,23 +110,20 @@ function class:load_config()
 			end)
 		end
 
+		-- Controllers
+		route:fs(self._lwf_root.."/controller")
+
+		-- On error page
 		route:on("error", function(self, code) 
 			return template.render("error.html", create_context(self, {code = code}))
 		end)
 
+		self._route = route
+		self._translations = load_i18n(self._lwf_root.."/i18n")
 		self._session = util.loadfile_as_table(self._lwf_root..'/config/session.lua') or {
 			secret = "0cc312cbaedad75820792070d720dbda"
 		}
 		self._session['cipher'] = 'none'
-
-		self._route = route
-		self._translations = load_i18n(self._lwf_root.."/i18n")
-
-		local config, err = util.loadfile_as_table(self._lwf_root..'/config/auth.lua')
-		if config then
-			self:load_auth(config)
-		end
-
 		self._loaded = true
 	end
 	return self._route
@@ -140,7 +141,6 @@ function class:handle(...)
 	local route = self:load_config()
 
 	local template = require 'resty.template'
-	local reqargs = require 'resty.reqargs'
 
 	local session = require('resty.session').start(self._session)
 	local translator = self:get_translator(session)
@@ -151,7 +151,6 @@ function class:handle(...)
 		ngx = lngx,
 		route = route,
 		template = template,
-		reqargs = reqargs,
 		render = function(...)
 			auth:save()
 			return template.render(...)

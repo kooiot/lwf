@@ -125,7 +125,7 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 	self.req = to_ngx_req(self, body, httpver)
 	self.resp = to_ngx_resp(self)
 	self.ctx = {}
-	self.status = 200
+	self.status = nil
 	self.write_response = response
 	self.socket = sock
 
@@ -144,7 +144,7 @@ local function create_wrapper(doc_root)
 		arg = {},
 		ctx = {},
 		location = {},
-		status = 200,
+		status = nil,
 	}
 	ngx.header = setmetatable({}, {
 		__newindex = function(tab, key, value) 
@@ -167,7 +167,7 @@ local function create_wrapper(doc_root)
 		assert(nil, uri, args)
 	end
 	ngx.redirect = function(uri, status)
-		local status = status or 302
+		local status = status or ngx.status or 302
 		ngx.resp.set_header('Location', uri)
 		local header = dump_ngx_header(ngx.resp.get_headers())
 		response(ngx, status, ngx.resp.get_body(), header)
@@ -187,11 +187,11 @@ local function create_wrapper(doc_root)
 	ngx.flush = function(wait)
 		assert(false, "flush fake!")
 		local header = dump_ngx_header(ngx.resp.get_headers())
-		return response(ngx, ngx.status, ngx.resp.get_body(), header)
+		return response(ngx, ngx.status or 200, ngx.resp.get_body(), header)
 	end
 	ngx.exit = function(status)
 		local header = dump_ngx_header(ngx.resp.get_headers())
-		return response(ngx, status or ngx.status, ngx.resp.get_body(), header)
+		return response(ngx, status or ngx.status or 200, ngx.resp.get_body(), header)
 	end
 	ngx.eof = function() return true end
 	ngx.sleep = function(seconds)

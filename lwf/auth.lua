@@ -51,7 +51,7 @@ function user_class:verify()
 	return false
 end
 
-function user_class:authenticate(username, password, ...)
+function user_class:login(username, password, ...)
 	self:clear()
 	local impl = self._impl
 	local r, err = impl:authenticate(username, password, ...)
