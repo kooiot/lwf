@@ -1,89 +1,115 @@
-local logger = require 'lwf.logger'
+local cjson = require 'cjson.safe'
+local class = {}
+local user_class = {}
 
-local function create_user(lwf, user, meta)
-	local user = {
-		lwf = lwf,
-		user = user,
-		meta = meta or {},
-		-- TODO: more user meta
-		logout = function(self)
-			assert(self and self.lwf)
-			lwf.auth:clear_identity(self.user)
-			self.user = "Guest" 
-			lwf.session.data.user = self.user
-			lwf.session:save()
-		end
-	}
-	return user
+
+function user_class.new(auth, session)
+	assert(session)
+	local obj = setmetatable({ _impl = auth._impl }, { __index = user_class })
+	obj:load(session)
+	return obj
 end
 
-local function identity(lwf, app, auth)
-	local session = lwf.ctx.session
-	local username = session:get('username')
-	local identity = session:get('identity')
-	if username and identity then
-		--logger:info('Identity '..username..' '..identity)
-		local r, err = auth:identity(username, identity)
+function user_class:load(session)
+	self.session = session
+	self.user = session.data.user
+	self.user_sid = session.data.user_sid
+	self.meta = {}
+	self:verify()
+end
+
+function user_class:save()
+	local session = self.session
+	if not session then
+		return nil, "Session not binded"
+	end
+	session.data.user = self.user
+	session.data.user_sid = self.user_sid
+	self._impl:set_metadata(self.user, self.meta)
+	session:save()
+	return true
+end
+
+function user_class:clear()
+	self.user = 'Guest'
+	self.user_sid = nil
+	self.meta = {}
+end
+
+function user_class:verify()
+	local impl = self._impl
+	local user = self.user
+	local sid = self.user_sid
+	if user and sid then
+		local r, err = impl:verify(user, sid)
 		if r then
-			local meta = auth:get_metadata(username)
-			--logger:info('Identity OK '..username..' '..identity)
-			-- Create user object
-			local user = create_user(lwf, app, username, meta)
-			lwf.ctx.user = user
-		else
-			--logger:info('Identity Failure '..username..' '..identity)
-			-- Clear session data
-			session:clear()
+			self.meta = impl:get_metadata(username)
+			return true
 		end
-	else
-		--[[
-		local err = 'Identity lack of '
-		if not username then
-			err = err..'username'
-		end
-		if not identity then
-			err = err..'identity'
-		end
-		logger:debug(err)
-		]]--
+	end
+	self:clear()
+	return false
+end
+
+function user_class:authenticate(username, password, ...)
+	self:clear()
+	local impl = self._impl
+	local r, err = impl:authenticate(username, password, ...)
+	if not r then
+		return nil, err
+	end
+	local sid, err = impl:get_sid(username)
+	if not sid then
+		return nil, err
+	end
+
+	self.user = username
+	self.user_sid = sid
+	self.meta = impl:get_metadata(username)
+
+	return true
+end
+
+function user_class:login_as(username)
+	local impl = self._impl
+	self.user = username
+	self.user_sid = impl:get_sid(username)
+	self.meta = impl:get_metadata(username)
+	return true
+end
+
+function user_class:logout()
+	if self.user ~= 'Guest' then
+		self._impl:clear_sid(self.user)
+	end
+	self:clear()
+end
+
+function class:create_user(session)
+	return user_class.new(self, session)
+end
+
+function class:init()
+	local impl = self._impl
+	if impl.startup then
+		impl:startup()
 	end
 end
 
-local function wrapper_auth(lwf, app, auth)
-	assert(auth)
-	local authenticate = auth.authenticate
-	auth.authenticate = function(self, username, password, ...)
-		local r, err = authenticate(self, username, password, ...)
-		if not r then
-			return nil, err
-		end
-		local identity, err = self:get_identity(username)
-		if not identity then
-			return nil, err
-		end
-
-		local session = lwf.ctx.session
-		session:set('username', username)
-		session:set('identity', identity)
-		--logger:info(username, ', ', identity)
-		local meta = self:get_metadata(username)
-
-		local user = create_user(lwf, app, username, meta)
-		lwf.ctx.user = user
-		return true
+function class:destroy()
+	local impl = self._impl
+	if impl.teardown then
+		impl:teardown()
 	end
-	return auth
 end
 
-return function (lwf, cfg)
-	assert(cfg)
+local function load_auth(realm, cfg)
 	local auth = nil
 	local cfgt = {}
 	if type(cfg) == 'string' then
 		auth = require('lwf.auth.'..cfg)
 	elseif type(cfg) == 'table' then
-		local an = cfg.name
-		auth = require('lwf.auth.'..an)
+		auth = require('lwf.auth.'..cfg.name)
 		cfgt = cfg
 	elseif type(cfg) == 'function' then
 		auth = { new = cfg }
@@ -91,19 +117,27 @@ return function (lwf, cfg)
 		assert('Incorrect configuration for auth')
 	end
 	assert(auth)
-	return {
-		create = function()
-			local auth = auth.new(lwf, cfgt)
-			if auth.startup then
-				auth:startup()
-			end
-			identity(lwf, auth)
-			return wrapper_auth(lwf, auth)
-		end,
-		close = function(auth)
-			if auth.teardown then
-				auth:teardown()
-			end
+	return auth.new(realm, cfgt)
+end
+
+function class.new(realm, cfg)
+	assert(cfg)
+	local auth = load_auth(realm, cfg)
+
+	return setmetatable({
+		realm=realm,
+		cfg=cfg,
+		_impl=auth,
+	}, {
+		__index=class,
+		__gc = function(self)
+			self:destroy()
 		end
-	}
+	})
+end
+
+return function (realm, cfg)
+	local auth = class.new(realm, cfg)
+	auth:init()
+	return auth
 end

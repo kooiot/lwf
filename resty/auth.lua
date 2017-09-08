@@ -1,1 +1,0 @@
-../3rd/lua-resty-auth/lib/resty/auth.lua

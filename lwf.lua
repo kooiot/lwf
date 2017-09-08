@@ -61,6 +61,9 @@ function class:load_auth(config)
 		return nil, "no Auth"
 	end
 
+	local auth = require 'lwf.auth' 
+	self._auth = auth(config.realm, config.auth)
+
 	--[[
 	local auth = require 'resty.auth'
 	assert(auth.setup(config))
@@ -74,6 +77,10 @@ function class:load_auth(config)
 end
 
 function class:get_auth(session)
+	local auth = self._auth
+	if auth then
+		return auth:create_user(session)
+	end
 end
 
 function class:load_config()
@@ -145,11 +152,15 @@ function class:handle(...)
 		route = route,
 		template = template,
 		reqargs = reqargs,
-		render = template.render,
+		render = function(...)
+			auth:save()
+			return template.render(...)
+		end,
 		session = session,
 		auth = auth,
-		json = function(self, data)
-			return self:json(data)
+		json = function(router, data)
+			auth:save()
+			return router:json(data)
 		end,
 		translate = translator.translate,
 		translatef = translator.translatef,

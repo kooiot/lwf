@@ -9,12 +9,11 @@ local md5 = require 'md5'
 local _M = {}
 local class = {}
 
-_M.new = function(lwf, app, cfg)
+_M.new = function(realm, cfg)
 	local obj = {
-		lwf = lwf,
-		app = app,
+		realm = realm,
+		cfg = cfg,
 		conn = conn,
-		cfg = cfg
 	}
 
 	return setmetatable(obj, {__index=class})
@@ -66,7 +65,7 @@ function class:authenticate(username, password)
 	return false, 'Incorrect username or password'
 end
 
-function class:identity(username, identity)
+function class:verify(username, sid)
 	local qusername = quote(username)
 	local sql = 'select * from identity where username='..qusername
 	local res, err = self.conn:query(sql) 
@@ -80,7 +79,7 @@ function class:identity(username, identity)
 	end
 end
 
-function class:get_identity(username)
+function class:get_sid(username)
 	--logger:debug('[MYSQL] get_identity '..username)
 	local qusername = quote(username)
 	local sql = 'select * from identity where username='..qusername
@@ -101,7 +100,7 @@ function class:get_identity(username)
 	end
 end
 
-function class:clear_identity(username)
+function class:clear_sid(username)
 	local username = quote(username)
 	self.conn:query('delete from identity where username='..username)
 	return true

@@ -9,7 +9,7 @@ local md5 = require 'md5'
 local _M = {}
 local class = {}
 
-_M.new = function(lwf, app)
+_M.new = function(realm, cfg)
 	local red = redis:new()
 	red:set_timeout(500)
 	local ok, err = red:connect('127.0.0.1', 6379)
@@ -17,8 +17,8 @@ _M.new = function(lwf, app)
 		logger:error('Authentification module [Redis] got Error -'..tostring(err))
 	end
 	local obj = {
-		lwf = lwf,
-		app = app,
+		realm = realm,
+		cfg = cfg,
 		red = red,
 	}
 
@@ -39,7 +39,7 @@ function class:authenticate(username, password)
 	return false, 'Incorrect username or password'
 end
 
-function class:identity(username, identity)
+function class:verify(username, identity)
 	local dbidentity = self.red:get('user_identity.'..username)
 	if not dbidentity or dbidentity ~= ngx.null then
 		--logger:debug('dbidentity '..dbidentity..' identity:'..identity)
@@ -50,7 +50,7 @@ function class:identity(username, identity)
 	end
 end
 
-function class:get_identity(username)
+function class:get_sid(username)
 	local identity = self.red:get('user_identity.'..username)
 	if not identity or identity == ngx.null then
 		identity = md5.sumhexa(username..os.date())
@@ -60,7 +60,7 @@ function class:get_identity(username)
 	return identity
 end
 
-function class:clear_identity(username)
+function class:clear_sid(username)
 	self.red:del('user_identity.'..username)
 	return true
 end

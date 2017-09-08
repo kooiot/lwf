@@ -5,11 +5,11 @@ local md5 = require 'md5'
 
 local _M = {}
 local class = {}
-local salt = "SimpleAuth"
+local default_salt = "SimpleAuth"
+local default_file = ".htpasswd.lwf"
 
-local function load_auth_file(path)
+local function load_auth_file(path, salt)
 	local keys = {}
-	keys.admin = md5.sumhexa('admin'..salt)
 
 	if not path then
 		return keys
@@ -21,12 +21,19 @@ local function load_auth_file(path)
 		for k, v in string.gmatch(c, "(%w+)=(%w+)") do
 			keys[k] = v
 		end
+		file:close()
+	end
+
+	if keys['__salt'] ~= salt then
+		return {
+			admin = md5.sumhexa('admin'..salt)
+		}
 	end
 
 	return keys
 end
 
-local function save_auth_file(path, keys)
+local function save_auth_file(path, keys, salt)
 	if not path then
 		return nil, "file not configured"
 	end
@@ -36,10 +43,9 @@ local function save_auth_file(path, keys)
 		return nil, err
 	end
 
+	file:write(string.format('%s=%s', '__salt', salt))
 	for k, v in pairs(keys) do
-		file:write(k)
-		file:write('=')
-		file:write(v)
+		file:write(string.format('%s=%s', k, v))
 	end
 
 	file:close()
@@ -47,51 +53,60 @@ local function save_auth_file(path, keys)
 	return true
 end
 
-_M.new = function(lwf, app, cfg)
+_M.new = function(realm, cfg)
+	local salt = cfg.salt or default_salt
+	local file = cfg.file or default_file
+	local keys = load_auth_file(file, salt)
 	local obj = {
-		lwf = lwf,
-		app = app,
-		_file = cfg.file,
-		_keys = load_auth_file(cfg.file),
+		realm = realm,
+		cfg = cfg,
+		_salt = salt,
+		_file = file,
+		_keys = keys,
 	}
 
 	return setmetatable(obj, {__index=class})
 end
 
 function class:authenticate(username, password)
-	local md5passwd = md5.sumhexa(password..salt)
+	local md5passwd = md5.sumhexa(password..self._salt)
 	if self._keys[username] and self._keys[username] == md5passwd then
 		return true
 	end
 	return false, 'Incorrect username or password'
 end
 
-function class:identity(username, identity)
-	local key = username..self._keys[username] or ''
-	local dbidentity = md5.sumhexa(key..salt)
-	return dbidentity == identity
+function class:verify(username, sid)
+	if not self._keys[username] then
+		return false, 'No such user'
+	end
+	return self:get_sid(username) == sid
 end
 
-function class:get_identity(username)
-	local key = username..self._keys[username] or ''
-	return  md5.sumhexa(key..salt)
+function class:get_sid(username)
+	local key = username..(self._keys[username] or '')
+	return  md5.sumhexa(key..self._salt)
 end
 
-function class:clear_identity(username)
+function class:clear_sid(username)
 	return true
 end
 
 function class:set_password(username, password)
-	self._keys[username] = md5.sumhexa(password..salt)
-	save_auth_file(self._file, self._keys)
+	self._keys[username] = md5.sumhexa(password..self._salt)
+	save_auth_file(self._file, self._keys, self._salt)
 end
 
 function class:add_user(username, password, mt)
-	self._keys[username] = md5.sumhexa(password..salt)
-	save_auth_file(self._file, self._keys)
+	self._keys[username] = md5.sumhexa(password..self._salt)
+	save_auth_file(self._file, self._keys, self._salt)
 end
 
-function class:get_metadata(username, key)
+function class:get_metadata(username)
+	return nil, 'Meta data is not support by simple auth module'
+end
+
+function class:set_metadata(username, meta)
 	return nil, 'Meta data is not support by simple auth module'
 end
 
