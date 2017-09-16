@@ -4,8 +4,8 @@
 
 {-main-}
 {% if lwf.auth.user == 'Guest' then %}
-{% if err then %}
-<div class="ui red message">{{ _(err) }}</div>
+{% if message then %}
+<div class="ui red message">{{ _(message) }}</div>
 {% end %}
 
 <div class="ui centered stackable grid">
@@ -16,6 +16,9 @@
 			</div>
 			<div class="ui segment">
 				<form class="ui login form" action="/login" method="POST">
+					<div class="filed">
+						<input type="hidden" name="from_web" value="1">
+					</div>
 					<div class="field">
 						<div class="ui left icon input">
 							<input type="text" name="username" placeholder="Username">

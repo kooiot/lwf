@@ -24,9 +24,13 @@ return {
 			end
 		end
 		lwf.auth:save()
-		self:json({message=msg})
-		if r ~= 200 then
-			self:fail(r)
+		if not post.from_web then
+			self:json({message=msg})
+			if r ~= 200 then
+				self:fail(r)
+			end
+		else
+			lwf.render('user/login.html', {message=msg})			
 		end
 	end,
 	logout = function(self)
