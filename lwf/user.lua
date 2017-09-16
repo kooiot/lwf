@@ -1,6 +1,6 @@
 return {
 	login = function(self)
-		if ngx.var.method ~= 'POST' then
+		if ngx.var.method ~= 'POST' and ngx.var.http_accept ~= 'application/json' then
 			return lwf.render('user/login.html', self)
 		end
 
@@ -24,7 +24,7 @@ return {
 			end
 		end
 		lwf.auth:save()
-		if not post.from_web then
+		if not post.from_web or ngx.var.http_accept == 'application/json' then
 			self:json({message=msg})
 			if r ~= 200 then
 				self:fail(r)
@@ -36,7 +36,7 @@ return {
 	logout = function(self)
 		lwf.auth:logout()
 		lwf.auth:save()
-		if ngx.var.method == 'POST' then
+		if ngx.var.method == 'POST' or ngx.var.http_accept == 'application/json' then
 			self:json({message="OK"})
 		else
 			self:redirect('/user/home')
