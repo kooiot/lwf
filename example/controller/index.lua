@@ -9,8 +9,6 @@ return {
 		if lwf.auth.user == 'Guest' then
 			lwf.auth:login_as('admin')
 		end
-
-		--lwf.render('view.html', lwf.session.data)
-		lwf.render('view.html', lwf.auth)
+		lwf.render('index.html')
 	end
 }

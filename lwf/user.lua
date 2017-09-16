@@ -1,7 +1,7 @@
 return {
 	login = function(self)
 		if ngx.var.method ~= 'POST' then
-			return lwf.render('login.html', self)
+			return lwf.render('user/login.html', self)
 		end
 
 		local msg = "incorrect login"
@@ -30,12 +30,12 @@ return {
 		end
 	end,
 	logout = function(self)
-		if ngx.var.method ~= 'POST' then
-			return lwf.render('logout.html', self)
-		else
-			lwf.auth:logout()
-			lwf.auth:save()
+		lwf.auth:logout()
+		lwf.auth:save()
+		if ngx.var.method == 'POST' then
 			self:json({message="OK"})
+		else
+			self:redirect('/login')
 		end
 	end,
 	home = function(self)
