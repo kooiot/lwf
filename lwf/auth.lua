@@ -43,7 +43,7 @@ function user_class:verify()
 	if user and sid then
 		local r, err = impl:verify(user, sid)
 		if r then
-			self.meta = impl:get_metadata(username)
+			self.meta = impl:get_metadata(username) or {}
 			return true
 		end
 	end
@@ -65,16 +65,17 @@ function user_class:login(username, password, ...)
 
 	self.user = username
 	self.user_sid = sid
-	self.meta = impl:get_metadata(username)
+	self.meta = impl:get_metadata(username) or {}
 
 	return true
 end
 
 function user_class:login_as(username)
+	assert(username)
 	local impl = self._impl
 	self.user = username
 	self.user_sid = impl:get_sid(username)
-	self.meta = impl:get_metadata(username)
+	self.meta = impl:get_metadata(username) or {}
 	return true
 end
 
