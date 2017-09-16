@@ -150,7 +150,8 @@ local function create_wrapper(doc_root)
 		__newindex = function(tab, key, value) 
 			ngx.resp.set_header(key, value)
 		end,
-		__index=function(tab, key) return ngx.var.header[key] or ngx.resp.get_header(key) end,
+		--__index=function(tab, key) return ngx.resp.get_header(key) or ngx.var.header[key] end,
+		__index=function(tab, key) return ngx.resp.get_header(key) end,
 	})
 	ngx.location.capture = function(uri, options)
 		assert(false, "NOT Implemented")

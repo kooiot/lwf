@@ -88,8 +88,8 @@ function class:load_config()
 			route:as(lwf_user)
 			route("=*/user/home", "@home")
 			]]--
-			route:post('=*/login', function(self) return lwf_user.login(self) end)
-			route:post('=*/logout', function(self) return lwf_user.logout(self) end)
+			route('=*/login', function(self) return lwf_user.login(self) end)
+			route('=*/logout', function(self) return lwf_user.logout(self) end)
 			route('=*/user/home', function(self) return lwf_user.home(self) end)
 		end
 
@@ -114,8 +114,15 @@ function class:load_config()
 		route:fs(self._lwf_root.."/controller")
 
 		-- On error page
-		route:on("error", function(self, code) 
-			return template.render("error.html", create_context(self, {code = code}))
+		route:on("error", function(self, code, ...) 
+			--[[
+			if ngx.resp.has_body and not ngx.resp.has_body() then
+				return
+			end
+			]]--
+			if ngx.header.content_type ~= 'application/json' then
+				return template.render("error.html", create_context(self, {code = code}))
+			end
 		end)
 
 		self._route = route

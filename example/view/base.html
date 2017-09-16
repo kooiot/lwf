@@ -1,0 +1,274 @@
+<!--[if lt IE 9]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]--> 
+<!DOCTYPE html>
+<html><head>
+  <!-- Standard Meta -->
+<meta charset="utf-8">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="icon" href="assets/favicon.ico" mce_href="/assets/favicon.ico" type="image/x-icon">
+
+<link rel="image_src" type="image/jpeg" href="/assets/img/logo.png">
+
+<!-- Site Properities -->
+<title>TipsyDate - {{ ngx.var.request_uri }}</title>
+
+<script>
+(function () {
+  var
+    eventSupport = ('querySelector' in document && 'addEventListener' in window)
+    jsonSupport  = (typeof JSON !== 'undefined'),
+    jQuery       = (eventSupport && jsonSupport)
+      ? '/assets/library/jquery.min.js'
+      : '/assets/library/jquery.legacy.min.js'
+  ;
+  document.write('<script src="' + jQuery + '"><\/script>');
+}());
+</script><script src="/assets/library/jquery.form.min.js"></script>
+
+<script src="/assets/library/easing.min.js"></script>
+<script src="/assets/library/highlight.min.js"></script>
+<script src="/assets/library/highlight.languages.min.js"></script>
+<script src="/assets/library/history.min.js"></script>
+<script src="/assets/library/tablesort.min.js"></script>
+
+<script src="/assets/semantic/semantic.min.js"></script>
+
+<script src="/assets/js/docs.js"></script>
+<script src="/assets/js/menu.js"></script>
+<script src="/assets/js/accordion.js"></script>
+<script src="/assets/js/dropdown.js"></script>
+  
+<link rel="stylesheet" type="text/css" class="ui" href="/assets/semantic/semantic.min.css">
+
+<link rel="stylesheet" type="text/css" href="/assets/css/docs.css">
+<link rel="stylesheet" type="text/css" href="/assets/css/rtl.css">
+<link rel="stylesheet" type="text/css" href="/assets/library/github-buttons.css">
+
+<!-- Semantic Website uses this for translation -->
+<!--script type="text/javascript" src="/assets/library/live.js"></script-->
+
+<body id="example" class="pushable" ontouchstart="">
+
+	<div class="ui vertical inverted sidebar menu left" id="toc">
+		<div class="item">
+			<a class="ui logo icon image" href="http://www.kooiot.com/">
+				<img src="/assets/img/logo.png" alt="logo">
+			</a>
+			<a href="http://www.kooiot.com/"><b>KooIoT</b></a>
+		</div>
+		{% if not lwf.auth.user then %}
+		<a class="item" href="/user/login">
+			<i class="inverted blue sign in icon"></i><b> {{_("Login") }}</b>
+		</a>
+		{% else %}
+		<a class="item" href="/store">
+			<i class="inverted blue download cloud icon"></i><b> {{_("Install New") }}</b>
+		</a>
+
+		<div class="item">
+			<b> {{_('System')}}</b>
+			<div class="menu">
+				<a class="item" href="/system/network"> {{_('Network')}}</a>
+				<a class="item" href="/system/config"> {{_('Configuration')}}</a>
+				<a class="item" href="/system/upgrade"> {{_('Upgrade')}}</a>
+				<a class="item" href="/system/backup"> {{_('Backup')}}</a>
+			</div>
+		</div>
+
+		{% if lwf.auth.session.data.advance == 'true' then %}
+		<div class="item">
+			<b> {{_("Utilies")}}</b>
+			<div class="menu">
+				<a class="item" href="/data"> {{_('Data')}}</a>
+				<a class="item" href="/log"> {{_('Log')}}</a>
+				<a class="item" href="/packets"> {{_('Packets')}}</a>
+			</div>
+		</div>
+		{% end %}
+
+		{% if apps then  %}
+		<div class="item">
+			<b> {{_("Applications")}}</b>
+			<div class="menu">
+				{% for cate, lst in pairs(apps) do %}
+				<div class="item">
+					<b> {{ cate:upper() }} </b>
+					<div class="menu">
+						{% for _, v in pairs(lst) do %}
+						<a class="item" href="/apps/{{v.lname}}"> {{v.lname}}</a>
+						{% end %}
+					</div>
+				</div>
+				{% end %}
+			</div>
+		</div>
+		{% end %}
+
+		<div class="item">
+			<b> {{lwf.auth.user }}</b>
+			<div class="menu">
+				<a class="item" href="/user/settings">
+					<i class="inverted teal settings icon"></i> {{_("Settings")}}
+				</a>
+				<a class="item" href="/user/logout">
+					<i class="inverted red sign out icon"></i> {{_("Logout")}}
+				</a>
+			</div>
+		</div>
+		{% end %}
+
+		<div class="item">
+			<b> {{_('Help')}}</b>
+			<div class="menu">
+				<a class="item" href="http://tipsydate.kooiot.org/forum" target="_blank">
+					<i class="inverted teal linkify icon"></i> {{_("Forum")}}
+				</a>
+				<a class="item" href="/about"> {{_('About')}}</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="ui black big launch right attached fixed button">
+		<i class="content icon"></i>
+		<span class="text">{{_("Menu")}}</span>
+	</div>
+
+	<div class="ui fixed inverted main menu">
+		<div class="container">
+			<a class="launch item">
+				<i class="content icon"></i>
+				{{_("Menu")}}
+			</a>
+
+			<div class="header item">
+				<b>TipsyDate:</b>&nbspGo
+			</div>
+
+			<a class="popup item" data-content="Go home" href="/">
+				<i class="home icon"></i> {{_('Home')}}
+			</a>
+
+			{% if lwf.auth.user then %}
+			<a class="popup item" data-content="Get More Apps" href="/store">
+				<i class="cloud download icon"></i> {{_('Store' )}}
+			</a>
+			{% end %}
+
+			{% if lwf.auth.user and lwf.auth.session.data.advance == 'true' then %}
+				<div class="section ui page dropdown link item">
+					<i class="list layout icon"></i>
+					<span class="count">
+					{{_("More")}}
+					</span>
+					<div class="menu">
+						<a class="item" href="/data">
+							<i class="table icon"></i> {{_('Data')}}
+						</a>
+						<a class="item" href="/log">
+							<i class="list icon"></i> {{_('Log')}}
+						</a>
+						<a class="item" href="/packets">
+							<i class="tasks icon"></i> {{_('Packets')}}
+						</a>
+					</div>
+				</div>
+			{% end %}
+
+			<div class="right menu">
+				<div class="vertically fitted borderless item">
+					<span class="github-btn" data-user="zeromq" data-repo="lzmq" data-type="watch" data-count="1"></span>
+				</div>
+				<a class="popup icon github item" data-content="View Source Code" href="http://git.kooiot.org/tipsydate/core" target="_blank">
+					<i class="alternate github icon"></i>
+				</a>
+				<div class="ui language dropdown item" id="languages" data-content="Select Language">
+					<i class="world icon"></i>
+					<div class="menu">
+						<a class="item" href="/lang/en">
+							<i class="us flag"></i> English
+						</a>
+						<a class="item" href="/lang/zh">
+							<i class="cn flag"></i> 中文(简体)
+						</a>
+					</div>
+				</div>
+				{% if lwf.auth.user then %}
+				<div class="section ui page dropdown link item">
+					<i class="icon user"></i> {{lwf.auth.user }}
+					<div class="menu">
+						{% if lwf.auth.session.data.advance == 'true' then %}
+						<a class="item" href="/user/simple">
+							<i class="teal hide icon"></i> {{_('Simple')}}
+						</a>
+						{% else %}
+						<a class="item" href="/user/advance">
+							<i class="unhide icon"></i> {{_('Advance')}}
+						</a>
+						{% end %}
+						<a class="item" href="/user/settings">
+							<i class="settings icon"></i> {{_("Settings")}}
+						</a>
+						<a class="item" href="/user/logout"><i class="sign out icon"></i> {{_("Logout")}}</a>
+					</div>
+				</div>
+				{% else %}
+				<a class="item" href="/user/login">
+					<i class="sign in icon"></i>{{_('Sign In')}}
+				</a>
+				{% end %}
+			</div>
+		</div>
+	</div>
+<div class="pusher">
+	<div class="full height">
+		{* blocks.main *}
+	</div>
+	<div class="ui inverted black footer vertical segment">
+		<div class="container">
+			<div class="ui stackable inverted divided relaxed grid">
+				<div class="eight wide column">
+					<h3 class="ui inverted header">{{_('Help Make TipsyDate Better')}}</h3>
+					<p>{{_('TipsyDate is an open source platform for internet of things stuff. Please follow us on GitHub!!!')}}</p>
+					<span class="github-btn" data-user="zeromq" data-repo="lzmq" data-type="follow" data-count="1"></span>
+				</div>
+				<div class="four wide column">
+					<h5 class="ui teal inverted header">{{_('Contribute')}}</h5>
+					<div class="ui inverted link list">
+						<a class="item" href="https://www.transifex.com/organization/tipsydate/" target="_blank">{{_('Translation Hub')}}</a>
+						<a class="item" href="http://tipsydate.kooiot.org/core" target="_blank">{{_('Issue Tracker')}}</a>
+						<a class="item" href="http://tipsydate.kooiot.org/core/cla.html" target="_blank">{{_('CLA')}}</a>
+						<a class="item" href="http://tipsydate.kooiot.in/core/app.html" target="_blank">{{_('Create Applicatoin')}}</a>
+					</div>
+				</div>
+				<div class="four wide column">
+					<h5 class="ui teal inverted header">{{_('TipsyDate Network')}}</h5>
+					<div class="ui inverted link list">
+						<a class="item" href="http://tipsydate.kooiot.org/" target="_blank">{{_('User Documents')}}</a>
+						<a class="item" href="http://tipsydate.kooiot.org/" target="_blank">{{_('Development Reference')}}</a>
+						<a class="disabled item">{{_('Applications')}}</a>
+						<a class="disabled item">{{_('Device Templates')}}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+window.less = {
+	async        : true,
+	environment  : 'production',
+	fileAsync    : false,
+	onReady      : false,
+	useFileCache : true
+};
+</script>
+
+<script src="/assets/library/less.min.js"></script>
+<script src="/assets/library/github-buttons.js"></script>
+
+</body></html>

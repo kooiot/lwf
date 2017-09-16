@@ -21,6 +21,9 @@ local function to_ngx_resp(ngx)
 				body[#body + 1] = v
 			end
 		end,
+		has_body = function()
+			return #body == 0
+		end,
 	}
 end
 
