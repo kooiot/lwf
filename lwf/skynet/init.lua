@@ -99,7 +99,7 @@ end
 local function to_ngx_header(header)
 	local re = {}
 	for k,v in pairs(header) do
-		local key = string.gsub(k, "-", "_")
+		local key = string.lower(string.gsub(k, "-", "_"))
 		re[key] = v
 	end
 	return re, cookies
@@ -133,7 +133,9 @@ function ngx_base:bind(method, uri, header, body, httpver, sock, response)
 end
 
 local function response(ngx, ...)
-	return ngx.write_response(ngx.var.socket or ngx.socket, ...)
+	assert(ngx.write_response)
+	ngx.write_response(ngx.var.socket or ngx.socket, ...)
+	ngx.write_response = nil
 end
 
 local function create_wrapper(doc_root)

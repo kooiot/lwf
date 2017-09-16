@@ -1,4 +1,8 @@
 
+local function map_key(k)
+	return string.lower(string.gsub(k, "-", "_"))
+end
+
 local function to_ngx_resp(ngx)
 	local ngx = ngx
 	local headers = {
@@ -10,9 +14,11 @@ local function to_ngx_resp(ngx)
 	return {
 		get_headers = function() return headers end,
 		set_header = function(header_name, header_value)
+			local header_name = map_key(header_name)
 			headers[header_name] = header_value
 		end,
 		get_header = function(header_name)
+			local header_name = map_key(header_name)
 			return headers[header_name]
 		end,
 		get_body = function() return table.concat(body) end,

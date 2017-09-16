@@ -122,10 +122,12 @@ local function handler(ngx, router, root, file)
 	end
 
 	local lm = os.date("!%a, %d %b %Y %H:%M:%S GMT", attr.modification)
-	ngx.header["last-modified"] = lm
+	ngx.header["Last-Modified"] = lm
 
 	local lms = ngx.var.header["if_modified_since"] or 0
-	if lms == lm then
+	--print(ngx.var.request_uri, lms, lm)
+	if lms == lm and false then
+		f:close()
 		return router:exit(304)
 	end
 
