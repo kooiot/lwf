@@ -15,7 +15,7 @@
 				<span class="ui header">Welcome in KooIoT Cloud</span>
 			</div>
 			<div class="ui segment">
-				<form class="ui login form" action="/login" method="POST">
+				<form class="ui login form" action="/user/login" method="POST">
 					<div class="filed">
 						<input type="hidden" name="from_web" value="1">
 					</div>
@@ -60,7 +60,7 @@
 			<div class="ui blue message">{{_("Welcome %s", lwf.auth.user) }}</div>
 		</div>
 		<div class="ui basic padded segment">
-			<a class="ui big button" href="/"><i class="home icon"></i> {{_("Home")}} </a>
+			<a class="ui big button" href="/user/home"><i class="home icon"></i> {{_("Home")}} </a>
 			<a class="ui big button" href="/dashboard"><i class="dashboard icon"></i> {{_("Dashboard")}} </a>
 			<a class="ui big button" href="/app"><i class="cubes icon"></i> {{_("Application")}} </a>
 			<a class="ui big button" href="/device"><i class="list layout icon"></i> {{_("Device")}} </a>

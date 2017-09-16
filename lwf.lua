@@ -88,8 +88,8 @@ function class:load_config()
 			route:as(lwf_user)
 			route("=*/user/home", "@home")
 			]]--
-			route('=*/login', function(self) return lwf_user.login(self) end)
-			route('=*/logout', function(self) return lwf_user.logout(self) end)
+			route('=*/user/login', function(self) return lwf_user.login(self) end)
+			route('=*/user/logout', function(self) return lwf_user.logout(self) end)
 			route('=*/user/home', function(self) return lwf_user.home(self) end)
 		end
 

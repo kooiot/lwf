@@ -39,14 +39,14 @@ return {
 		if ngx.var.method == 'POST' then
 			self:json({message="OK"})
 		else
-			self:redirect('/login')
+			self:redirect('/user/home')
 		end
 	end,
 	home = function(self)
 		if lwf.auth.user ~= 'Guest' then
 			self:redirect('/')
 		else
-			self:redirect('/login')
+			self:redirect('/user/login')
 		end
 	end,
 }

@@ -40,7 +40,7 @@
 					</div>
 				</div>
 				{% if lwf.auth.user == 'Guest' then %}
-				<a href="/login" class="icon item" data-content="Login">
+				<a href="/user/login" class="icon item" data-content="Login">
 					<i class="large sign in icon"></i>
 				</a>
 				<a href="http://www.kooiot.com" class="icon item">
@@ -93,7 +93,7 @@
 						<a href="/user/mail" class="item">{{_('Mails')}} <i class="mail icon"></i><div class="ui inverted label">2</div></a>
 						<a href="/user/msg" class="item">{{_('Messages')}} <i class="bell icon"></i><div class="ui inverted label">25</div></a>
 						<div class="ui divider"></div>
-						<a href="/logout" class="item">{{_('Logout')}} <i class="sign out icon"></i></a>
+						<a href="/user/logout" class="item">{{_('Logout')}} <i class="sign out icon"></i></a>
 					</div>
 				</div>
 				{% end %}
@@ -132,7 +132,7 @@
 							<div class="ui divider"></div>
 						</div>
 						<div class="ui fluid vertical menu" id="verticalMenu">
-							<a href="/login" class="item"><i class="sign in icon"></i> <span>{{_('Login')}}</span></a>
+							<a href="/user/login" class="item"><i class="sign in icon"></i> <span>{{_('Login')}}</span></a>
 							<a href="http://forum.kooiot.com" class="item"><i class="users icon"></i> <span>{{_('Form')}}</span></a>
 							<a href="/docs" class="item"><i class="file icon"></i> <span>{{_('Documents')}}</span></a>
 							<a href="/help" class="item"><i class="help icon"></i> <span>{{_('Help')}}</span></a>
