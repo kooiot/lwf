@@ -225,7 +225,16 @@
 	</div>
 <div class="pusher">
 	<div class="full height">
-		{* blocks.main *}
+		{#% if blocks.main_header then %#}
+		<div class="tab header segment">
+			<div class="container">
+				{* blocks.main_header *}
+			</div>
+		</div>
+		{#% end %#}
+		<div class="main container">
+			{* blocks.main *}
+		</div>
 	</div>
 	<div class="ui inverted black footer vertical segment">
 		<div class="container">
