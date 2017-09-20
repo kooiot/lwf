@@ -26,7 +26,7 @@ local function load_auth_file(path, salt)
 
 	if keys['__salt'] ~= salt then
 		return {
-			admin = md5.sumhexa('admin'..salt)
+			admin = md5.sumhexa('admin1'..salt)
 		}
 	end
 

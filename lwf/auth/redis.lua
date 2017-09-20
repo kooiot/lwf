@@ -32,7 +32,7 @@ function class:authenticate(username, password)
 	end
 	--logger:debug('authenticate: '..username..' Input:'..password..' DB:'..(tostring(pw) or 'nil')..' Error:'..(err or ''))
 	if not pw or pw == ngx.null then
-		if username == 'admin' and password == 'admin' then
+		if username == 'admin' and password == 'admin1' then
 			return true
 		end
 	end

@@ -57,8 +57,8 @@ function class:authenticate(username, password)
 
 	if not res or #res ~= 1 then
 		--logger:debug('Check for admin')
-		if username == 'admin' and password == 'admin' then
-			return self:add_user('admin', 'admin', {})
+		if username == 'admin' and password == 'admin1' then
+			return self:add_user('admin', 'admin1', {})
 			--return true
 		end
 	end
