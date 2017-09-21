@@ -42,15 +42,23 @@ msgid "Application"
 msgstr ""
 
 
+msgid "Application List"
+msgstr ""
+
+
 msgid "CLA"
 msgstr ""
 
 
-msgid "Card"
+msgid "Chart"
 msgstr ""
 
 
-msgid "Chart"
+msgid "Cloud"
+msgstr ""
+
+
+msgid "Comm Upload"
 msgstr ""
 
 
@@ -66,6 +74,10 @@ msgid "Dashboard"
 msgstr ""
 
 
+msgid "Data Upload"
+msgstr ""
+
+
 msgid "Development Reference"
 msgstr ""
 
@@ -75,6 +87,10 @@ msgstr ""
 
 
 msgid "Device Template"
+msgstr ""
+
+
+msgid "Devices List"
 msgstr ""
 
 
@@ -106,6 +122,18 @@ msgid "Help Make KooIoT Better"
 msgstr ""
 
 
+msgid "Home"
+msgstr ""
+
+
+msgid "Host"
+msgstr ""
+
+
+msgid "ID"
+msgstr ""
+
+
 msgid "Issue Tracker"
 msgstr ""
 
@@ -118,11 +146,19 @@ msgid "KooIoT is an open source platform for internet of things stuff. Please fo
 msgstr ""
 
 
+msgid "Log Upload"
+msgstr ""
+
+
 msgid "Login"
 msgstr ""
 
 
 msgid "Logout"
+msgstr ""
+
+
+msgid "MQTT"
 msgstr ""
 
 
@@ -134,7 +170,27 @@ msgid "Messages"
 msgstr ""
 
 
+msgid "Name"
+msgstr ""
+
+
+msgid "PKG"
+msgstr ""
+
+
+msgid "PKG Host URL"
+msgstr ""
+
+
+msgid "Port"
+msgstr ""
+
+
 msgid "Profile"
+msgstr ""
+
+
+msgid "SN"
 msgstr ""
 
 
@@ -142,7 +198,19 @@ msgid "Settings"
 msgstr ""
 
 
-msgid "Task"
+msgid "Sign Up"
+msgstr ""
+
+
+msgid "SignIn"
+msgstr ""
+
+
+msgid "Stat Upload"
+msgstr ""
+
+
+msgid "System"
 msgstr ""
 
 
@@ -150,11 +218,27 @@ msgid "Test View Page"
 msgstr ""
 
 
+msgid "Tiemout"
+msgstr ""
+
+
 msgid "Translation Hub"
 msgstr ""
 
 
+msgid "Upload Settings"
+msgstr ""
+
+
 msgid "User Documents"
+msgstr ""
+
+
+msgid "Version"
+msgstr ""
+
+
+msgid "Welcome %s"
 msgstr ""
 
 
