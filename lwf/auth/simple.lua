@@ -17,8 +17,8 @@ local function load_auth_file(path, salt)
 
 	local file, err = io.open(path)
 	if file then
-		local c = file:read('*a')
-		for k, v in string.gmatch(c, "(%w+)=(%w+)") do
+		for c in file:lines() do
+			local k, v = string.match(c, "([^=]+)=(%w+)")
 			keys[k] = v
 		end
 		file:close()
@@ -43,9 +43,9 @@ local function save_auth_file(path, keys, salt)
 		return nil, err
 	end
 
-	file:write(string.format('%s=%s', '__salt', salt))
+	file:write(string.format('%s=%s\n', '__salt', salt))
 	for k, v in pairs(keys) do
-		file:write(string.format('%s=%s', k, v))
+		file:write(string.format('%s=%s\n', k, v))
 	end
 
 	file:close()

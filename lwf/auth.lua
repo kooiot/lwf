@@ -86,6 +86,14 @@ function user_class:logout()
 	self:clear()
 end
 
+function user_class:update_password(password)
+	if self.user == 'Guest' then
+		return nil, "Guest cannot update password"
+	end
+	self._impl:set_password(self.user, password)
+	return true
+end
+
 function class:create_user(session)
 	return user_class.new(self, session)
 end
