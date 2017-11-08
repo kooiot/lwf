@@ -121,7 +121,7 @@ function class:load_config()
 			end
 			]]--
 			if ngx.header.content_type ~= 'application/json' then
-				return template.render("error.html", create_context(self, {code = code}))
+				return template.render("error.html", create_context(self, {code = code, info={...}}))
 			end
 		end)
 
