@@ -115,11 +115,9 @@ function class:load_config()
 
 		-- On error page
 		route:on("error", function(self, code, ...) 
-			--[[
-			if ngx.resp.has_body and not ngx.resp.has_body() then
+			if code < 400 then
 				return
 			end
-			]]--
 			if ngx.header.content_type ~= 'application/json' then
 				return template.render("error.html", create_context(self, {code = code, info={...}}))
 			end
