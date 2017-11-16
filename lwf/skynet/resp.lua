@@ -8,6 +8,7 @@ local function to_ngx_resp(ngx)
 	local headers = {
 		content_type = 'text/html; charset=utf-8',
 		server = 'skynet/lwf',
+		connection = 'close',
 		date = ngx.http_time(math.floor(ngx.now())),
 	}
 	local body = {}
