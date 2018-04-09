@@ -10,7 +10,7 @@ return {
 		end
 		ngx.req.read_body()
 
-		local r = 401
+		local status = 401
 		local post = ngx.req.get_post_args()
 		local username = post.username
 		local password = post.password
@@ -18,7 +18,7 @@ return {
 			local r, err = lwf.auth:login(username, password)	
 			if r then
 				msg = username
-				r = 200
+				status = 200
 			else
 				msg = err
 			end
@@ -26,8 +26,8 @@ return {
 		lwf.auth:save()
 		if not post.from_web or ngx.var.http_accept == 'application/json' then
 			self:json({message=msg})
-			if r ~= 200 then
-				self:fail(r)
+			if status ~= 200 then
+				self:fail(status)
 			end
 		else
 			lwf.render('user/login.html', {message=msg})			
