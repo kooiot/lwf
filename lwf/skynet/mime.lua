@@ -49,6 +49,7 @@ local mimetypes = {
   xhtml = "application/xhtml+xml",
   xht = "application/xhtml+xml",
   js = "application/x-javascript",
+  json = "application/json",
   skp = "application/x-koan",
   skd = "application/x-koan",
   skt = "application/x-koan",

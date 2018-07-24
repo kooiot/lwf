@@ -262,10 +262,12 @@ local function create_wrapper(doc_root)
 		return os.date('%F %T', math.floor(skynet_now))
 	end
 	ngx.cookie_time = function(sec)
-		return os.date('%a, %d-%b-%y %T %Z', sec)
+		--return os.date('%a, %d-%b-%y %T %Z', sec)
+		return os.date('%a, %d-%b-%y %H:%M:%S %Z', sec)
 	end
 	ngx.http_time = function(sec)
-		return os.date('%a, %d %b %Y %T %Z', sec)
+		--return os.date('%a, %d %b %Y %T %Z', sec)
+		return os.date('%a, %d-%b-%y %H:%M:%S %Z', sec)
 	end
 	ngx.parse_http_time = function(str)
 		assert(false)
