@@ -1,6 +1,7 @@
 local skynet = require 'skynet'
 local util = require "lwf.util"
 local urllib = require 'http.url'
+local cjson = require 'cjson.safe'
 
 local _M = {}
 
@@ -126,6 +127,12 @@ local function parse_post_data(header, body, tab, overwrite)
     local length = tonumber(header["content_length"]) or 0
     if length > 0 then
        parse_multipart_data(body:sub(1, length) or "", input_type, tab, overwrite)
+    end
+  elseif string.find(input_type, "application/json", 1, true) then
+    local length = tonumber(header["content_length"]) or 0
+	if length > 0 then
+      local post_data = body:sub(1, length) or ""
+      tab = cjson.decode(post_data)
     end
   else
     local length = tonumber(header["content_length"]) or 0
